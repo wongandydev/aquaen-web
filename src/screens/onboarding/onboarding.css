@@ -1,0 +1,37 @@
+.onboarding-progress {
+  height: 4px;
+  background: var(--card-edge);
+  flex-shrink: 0;
+}
+
+.onboarding-progress > div {
+  height: 100%;
+  background: var(--terracotta);
+  transition: width 0.3s ease-out;
+}
+
+.option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 14px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: var(--card);
+  cursor: pointer;
+}
+
+.option-row[aria-pressed='true'] {
+  border-color: var(--terracotta);
+  background: color-mix(in srgb, var(--terracotta) 22%, var(--card));
+}
+
+.highlight {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  border: 1px solid var(--terracotta);
+  background: color-mix(in srgb, var(--terracotta) 22%, transparent);
+}

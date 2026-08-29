@@ -1,0 +1,465 @@
+@import './theme.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--parchment);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  accent-color: var(--terracotta);
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 700;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+/* MARK: - App shell ------------------------------------------------------- */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--parchment);
+}
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.screen__scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 16px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Large navigation title, the way `navigationBarTitleDisplayMode(.large)` reads. */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 8px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--parchment);
+}
+
+.nav__title {
+  font-size: 30px;
+  letter-spacing: -0.4px;
+  font-family: var(--serif);
+}
+
+.nav__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* MARK: - Tab bar --------------------------------------------------------- */
+
+.tabbar {
+  display: flex;
+  border-top: 1px solid var(--card-edge);
+  background: var(--card);
+  padding-bottom: env(safe-area-inset-bottom);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.tabbar__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  color: var(--faded-ink);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.tabbar__item[aria-current='page'] {
+  color: var(--terracotta);
+}
+
+/* MARK: - Cards and form sections ----------------------------------------- */
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+
+.section {
+  margin-top: 24px;
+}
+
+.section__title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--faded-ink);
+  margin: 0 4px 8px;
+}
+
+.section__body {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  min-height: 48px;
+  border-bottom: 1px solid var(--card-edge);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.row--button {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--card-edge);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.row--button:last-child {
+  border-bottom: 0;
+}
+
+.row--button:hover {
+  background: color-mix(in srgb, var(--card-edge) 45%, transparent);
+}
+
+.row__label {
+  font-weight: 500;
+}
+
+.row__value {
+  color: var(--faded-ink);
+}
+
+.row__sub {
+  display: block;
+  font-size: 13px;
+  color: var(--faded-ink);
+  font-weight: 400;
+}
+
+/* MARK: - Controls -------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field__label {
+  font-weight: 600;
+}
+
+.input,
+.select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--parchment);
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  min-width: 0;
+  width: 100%;
+}
+
+.input:focus-visible,
+.select:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 1px;
+}
+
+.input--inline {
+  width: 110px;
+  text-align: right;
+}
+
+/* Sits on the trailing edge of a row: takes the space that's left rather than a
+   fixed width, so a long container name truncates gracefully instead of clipping. */
+.select--inline {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 62%;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--faded-ink);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 12px 18px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--terracotta);
+  color: #fff;
+  min-height: 44px;
+}
+
+.btn:disabled {
+  background: var(--faded-ink);
+  cursor: not-allowed;
+}
+
+.btn--block {
+  width: 100%;
+  height: 50px;
+  font-size: 17px;
+}
+
+.btn--plain {
+  background: none;
+  color: var(--terracotta);
+  padding: 8px 10px;
+  min-height: 44px;
+}
+
+.btn--plain:disabled {
+  background: none;
+  color: var(--faded-ink);
+}
+
+.btn--destructive {
+  background: var(--rust);
+}
+
+.btn--secondary {
+  background: var(--card-edge);
+  color: var(--ink);
+}
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  color: var(--terracotta);
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.icon-btn:hover {
+  background: color-mix(in srgb, var(--terracotta) 12%, transparent);
+}
+
+/* MARK: - Progress -------------------------------------------------------- */
+
+.meter {
+  height: 12px;
+  border-radius: 999px;
+  background: var(--card-edge);
+  overflow: hidden;
+}
+
+.meter--slim {
+  height: 8px;
+}
+
+.meter__fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
+}
+
+/* MARK: - Chips and badges ------------------------------------------------ */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.tag {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--terracotta);
+  background: color-mix(in srgb, var(--terracotta) 22%, transparent);
+}
+
+/* MARK: - Empty states ---------------------------------------------------- */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  padding: 32px;
+  background: var(--card);
+  border-radius: var(--radius);
+}
+
+.empty__title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--faded-ink);
+}
+
+.empty__body {
+  font-size: 15px;
+  color: var(--faded-ink);
+  margin: 0;
+}
+
+/* MARK: - Modal sheet ----------------------------------------------------- */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 35%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  padding: 24px 0 0;
+}
+
+@media (min-width: 640px) {
+  .sheet-backdrop {
+    align-items: center;
+    padding: 24px;
+  }
+}
+
+.sheet {
+  background: var(--parchment);
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 -8px 40px rgb(0 0 0 / 22%);
+}
+
+@media (min-width: 640px) {
+  .sheet {
+    border-radius: 20px;
+  }
+}
+
+.sheet__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 8px 8px 12px;
+  border-bottom: 1px solid var(--card-edge);
+}
+
+.sheet__title {
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.sheet__body {
+  padding: 8px 16px 24px;
+  overflow-y: auto;
+}
+
+/* MARK: - Utilities ------------------------------------------------------- */
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.stack--tight {
+  gap: 12px;
+}
+
+.spread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.muted {
+  color: var(--faded-ink);
+}
+
+.serif {
+  font-family: var(--serif);
+}
+
+.center {
+  text-align: center;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

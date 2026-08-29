@@ -1,0 +1,91 @@
+.bubble {
+  align-self: center;
+  margin: 0 auto;
+  font-family: var(--serif);
+  font-style: italic;
+  text-align: center;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  min-height: 1.45em;
+}
+
+.bubble--visible {
+  opacity: 1;
+}
+
+.buddy-stage {
+  height: 240px;
+  display: flex;
+  justify-content: center;
+}
+
+.buddy-stage > * {
+  height: 100%;
+  width: auto;
+  aspect-ratio: 0.85;
+}
+
+.fact-card {
+  display: grid;
+  gap: 8px;
+  text-align: left;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.fact-card__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--terracotta);
+}
+
+.fact-card__rule {
+  border: 0;
+  border-top: 1px solid var(--card-edge);
+  margin: 2px 0;
+  width: 100%;
+}
+
+.quick-add {
+  display: flex;
+  gap: 12px;
+}
+
+.quick-add__btn {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--water);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.quick-add__btn--more {
+  background: none;
+  color: var(--terracotta);
+  border: 1.5px dashed color-mix(in srgb, var(--terracotta) 50%, transparent);
+}
+
+.quick-add__label {
+  font-size: 12px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

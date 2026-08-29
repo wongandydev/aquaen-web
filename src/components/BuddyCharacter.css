@@ -1,0 +1,101 @@
+/* Animation for the buddy. The SwiftUI view drives bob/wave/blink from
+   `withAnimation` loops and a `Task` sleep; on the web the same four motions are
+   CSS keyframes, so nothing re-renders React at 60fps. */
+
+.buddy {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.buddy--interactive {
+  cursor: pointer;
+}
+
+.buddy--interactive:focus-visible {
+  outline: 2px solid var(--terracotta);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.buddy__tilt {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.buddy--droopy .buddy__tilt {
+  transform: rotate(4deg);
+}
+
+.buddy__squish {
+  transform-box: fill-box;
+  transform-origin: bottom center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+
+.buddy--squish .buddy__squish {
+  transform: scale(1.08, 0.92);
+}
+
+/* Gentle idle bob, with the shadow tightening as the buddy lifts. */
+.buddy--animated .buddy__body {
+  animation: buddy-bob 2.2s ease-in-out infinite alternate;
+}
+
+.buddy--animated .buddy__shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: buddy-shadow 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes buddy-bob {
+  from { transform: translateY(0.94px); }
+  to { transform: translateY(-1.77px); }
+}
+
+@keyframes buddy-shadow {
+  from { transform: scale(1); }
+  to { transform: scale(0.92); }
+}
+
+/* The wave is drawn two periods wide; sliding it one period left and looping
+   reads as the surface rolling forever. */
+.buddy--animated .buddy__wave {
+  animation: buddy-wave 3s linear infinite;
+}
+
+@keyframes buddy-wave {
+  from { transform: translateX(0); }
+  to { transform: translateX(-100px); }
+}
+
+/* Occasional blink; slower and heavier as the buddy dries out. */
+.buddy--animated .buddy__eye {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: buddy-blink 3.2s infinite;
+}
+
+.buddy--animated.buddy--droopy .buddy__eye {
+  animation-duration: 5s;
+}
+
+@keyframes buddy-blink {
+  0%, 94% { transform: scaleY(1); }
+  96%, 98% { transform: scaleY(0.12); }
+  100% { transform: scaleY(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buddy--animated .buddy__body,
+  .buddy--animated .buddy__shadow,
+  .buddy--animated .buddy__wave,
+  .buddy--animated .buddy__eye {
+    animation: none;
+  }
+
+  .buddy__squish {
+    transition: none;
+  }
+}
