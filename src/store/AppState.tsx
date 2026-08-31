@@ -50,17 +50,25 @@ function reassignDefaultIfNeeded(
 function reducer(state: AppData, action: Action): AppData {
   switch (action.type) {
     case 'completeOnboarding': {
-      const containers: Container[] = action.containers
-        .map((c) => ({ id: newId(), name: c.name, volumeOz: c.volumeOz }))
-        .sort(byName)
+      // Built in the order the user picked them, so the first pick becomes the
+      // default, then sorted by name for display the way the iOS fetch request is.
+      const picked: Container[] = action.containers.map((c) => ({
+        id: newId(),
+        name: c.name,
+        volumeOz: c.volumeOz,
+      }))
       return {
         ...state,
         hasCompletedOnboarding: true,
-        containers,
+        containers: [...picked].sort(byName),
         settings: {
           ...state.settings,
-          dailyGoalOz: clamped(action.dailyGoalOz, DAILY_GOAL_RANGE.min, DAILY_GOAL_RANGE.max),
-          defaultContainerId: containers[0]?.id ?? null,
+          // Rounded here rather than at each call site: the recommendation is
+          // weight x 0.67 x a multiplier, and a goal of "132.66 oz" is noise.
+          dailyGoalOz: Math.round(
+            clamped(action.dailyGoalOz, DAILY_GOAL_RANGE.min, DAILY_GOAL_RANGE.max),
+          ),
+          defaultContainerId: picked[0]?.id ?? null,
         },
       }
     }

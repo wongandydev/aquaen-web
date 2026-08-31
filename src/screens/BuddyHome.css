@@ -82,10 +82,18 @@
   border: 1.5px dashed color-mix(in srgb, var(--terracotta) 50%, transparent);
 }
 
+/* The name may truncate; the amount never does — it's the thing you're
+   confirming before a one-tap log, so it gets its own line. */
 .quick-add__label {
   font-size: 12px;
   max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.quick-add__volume {
+  font-size: 11px;
+  font-weight: 700;
+  opacity: 0.85;
 }

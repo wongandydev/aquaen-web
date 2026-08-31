@@ -164,9 +164,8 @@ export function BuddyHome({ onAddDrink }: { onAddDrink: () => void }) {
                 onClick={() => logContainer(container)}
               >
                 <Icon name="drop.fill" />
-                <span className="quick-add__label">
-                  {container.name} · {ozWhole(container.volumeOz)} oz
-                </span>
+                <span className="quick-add__label">{container.name}</span>
+                <span className="quick-add__volume">{ozWhole(container.volumeOz)} oz</span>
               </button>
             ))}
             <button type="button" className="quick-add__btn quick-add__btn--more" onClick={onAddDrink}>
