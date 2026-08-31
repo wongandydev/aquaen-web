@@ -44,6 +44,35 @@ Everything except the parts that only exist because of the App Store:
 - **No analytics, no crash reporter,** matching the iOS app's "Data Not Collected"
   posture. Nothing leaves the browser.
 
+## Mobile
+
+The app installs to the home screen (`public/manifest.webmanifest` plus a service
+worker in `public/sw.js`), and on mobile that is not cosmetic:
+
+- **iOS Safari evicts `localStorage` after 7 days without a visit.** Installed web
+  apps are exempt, so installing is what keeps a user's history from silently
+  disappearing over a week away. Settings says so, but only on an uninstalled iOS
+  browser, where it's actually true.
+- **Chrome on Android throws on `new Notification()`** and only permits
+  `showNotification()` on a service worker registration. Reminders go through the
+  registration when one exists and fall back to the constructor on desktop
+  browsers without one. Before this, reminders silently never arrived on Android
+  while Settings reported permission as granted.
+- `navigator.storage.persist()` is requested at startup — the equivalent
+  protection on Chromium. Safari ignores it; there, installing is the real fix.
+
+The worker caches the shell so a cold offline launch works. Navigations are
+network-first (a stale `index.html` would point at build assets that no longer
+exist); hashed assets are cache-first. Bump `CACHE` in `sw.js` to invalidate
+everything after a release.
+
+It registers only in production builds — a cached shell fights the dev server. To
+exercise it use `npm run build && npm run preview`, not `npm run dev`.
+
+**Reminders are still foreground-only on mobile.** Installing makes them possible;
+it does not make them wake the phone. Real background reminders need Web Push and
+a server to send it, which the no-backend decision rules out.
+
 ## Layout
 
 ```

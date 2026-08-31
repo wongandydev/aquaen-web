@@ -5,6 +5,7 @@ import { DAILY_GOAL_RANGE } from '../domain/types'
 import { clamped } from '../domain/clamp'
 import { ozWhole } from '../domain/format'
 import { useSyncedPermission } from '../services/reminders'
+import { isUninstalledIOS } from '../services/pwa'
 import { useAppState } from '../store/AppState'
 
 /** Port of `SettingsView.swift`. The Premium section is gone — the web build has
@@ -15,6 +16,10 @@ export function Settings({ onManageContainers }: { onManageContainers: () => voi
   const [permission, requestPermission] = useSyncedPermission()
   const [goalDraft, setGoalDraft] = useState(String(settings.dailyGoalOz))
   const [confirmingReset, setConfirmingReset] = useState(false)
+
+  // Read once: it cannot change without a reload, since installing to the home
+  // screen launches a separate window.
+  const [needsInstall] = useState(isUninstalledIOS)
 
   const commitGoal = (raw: string) => {
     const parsed = Number(raw)
@@ -121,7 +126,9 @@ export function Settings({ onManageContainers }: { onManageContainers: () => voi
           {settings.reminderEnabled && (
             <p className="hint" style={{ margin: '8px 4px 0' }}>
               {permission === 'unsupported'
-                ? 'This browser does not support notifications, so reminders cannot be delivered.'
+                ? needsInstall
+                  ? 'Safari only allows notifications for installed apps. Tap Share, then “Add to Home Screen”, and open Aquaen from there to get reminders.'
+                  : 'This browser does not support notifications, so reminders cannot be delivered.'
                 : permission === 'denied'
                   ? 'Notifications are blocked for this site. Re-allow them in your browser’s site settings to get reminders.'
                   : permission === 'default'
@@ -201,6 +208,12 @@ export function Settings({ onManageContainers }: { onManageContainers: () => voi
             {buddyName}, your goal, containers, and every logged drink live only in this
             browser — nothing is uploaded anywhere.
           </p>
+          {needsInstall && (
+            <p className="hint" style={{ margin: '8px 4px 0' }}>
+              Safari clears that storage after 7 days without a visit. Tap Share, then “Add
+              to Home Screen” to keep your history for good.
+            </p>
+          )}
         </section>
 
         <div style={{ height: 16 }} />

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { ACTIVE_DAY_END, ACTIVE_DAY_START } from '../domain/buddyEngine'
 import type { UserSettings } from '../domain/types'
+import { serviceWorkerRegistration } from './pwa'
 
 /** Hydration reminders, web edition.
  *
@@ -30,6 +31,37 @@ export async function requestNotificationPermission(): Promise<PermissionState> 
     return (await Notification.requestPermission()) as PermissionState
   } catch {
     return 'denied'
+  }
+}
+
+/** Displays one reminder.
+ *
+ *  Chrome on Android throws `Illegal constructor` on `new Notification()` and
+ *  requires the service worker registration to raise it instead — the old direct
+ *  construction meant reminders silently never arrived on Android while Settings
+ *  reported permission as granted. So: worker first, constructor as the fallback
+ *  for desktop browsers with no worker registered. */
+async function showReminder(title: string, body: string): Promise<void> {
+  const options: NotificationOptions = {
+    body,
+    tag: 'aquaen-reminder',
+    icon: '/icon-192.png',
+  }
+
+  const registration = serviceWorkerRegistration()
+  if (registration) {
+    try {
+      await registration.showNotification(title, options)
+      return
+    } catch {
+      /* fall through to the constructor */
+    }
+  }
+
+  try {
+    new Notification(title, options)
+  } catch {
+    /* a browser that rejects both paths just means no reminder this tick */
   }
 }
 
@@ -72,15 +104,7 @@ export function useReminders({ settings, lastDrinkDate, buddyName }: RemindersIn
       if (sinceLastDrink < intervalMs || sinceLastFired < intervalMs) return
 
       lastFiredRef.current = now.getTime()
-      try {
-        new Notification('Time for water', {
-          body: `${name} is getting thirsty — log a drink to top them up.`,
-          tag: 'aquaen-reminder',
-          icon: '/droplet.svg',
-        })
-      } catch {
-        /* a browser that rejects construction just means no reminder this tick */
-      }
+      void showReminder('Time for water', `${name} is getting thirsty — log a drink to top them up.`)
     }
 
     const id = window.setInterval(tick, POLL_MS)
