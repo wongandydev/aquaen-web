@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { ACTIVE_DAY_END, ACTIVE_DAY_START } from '../domain/buddyEngine'
 import type { UserSettings } from '../domain/types'
 import { serviceWorkerRegistration } from './pwa'
@@ -34,13 +34,50 @@ export async function requestNotificationPermission(): Promise<PermissionState> 
   }
 }
 
+/** Why a reminder could not be delivered, or `null` when the last attempt was
+ *  fine. Kept in a module-level store rather than component state because the
+ *  timer lives in `App` while the message is shown in Settings.
+ *
+ *  This exists because the failure it reports is one you cannot reproduce on a
+ *  desktop: swallowing it is what let Android report "granted" while delivering
+ *  nothing. If a reminder cannot be raised, the app should say so. */
+let deliveryFailure: string | null = null
+const failureListeners = new Set<() => void>()
+
+function setDeliveryFailure(next: string | null): void {
+  if (deliveryFailure === next) return
+  deliveryFailure = next
+  failureListeners.forEach((notify) => notify())
+}
+
+function subscribeToFailures(notify: () => void): () => void {
+  failureListeners.add(notify)
+  return () => failureListeners.delete(notify)
+}
+
+export function useReminderFailure(): string | null {
+  return useSyncExternalStore(
+    subscribeToFailures,
+    () => deliveryFailure,
+    () => null,
+  )
+}
+
+function describe(error: unknown): string {
+  if (error instanceof Error && error.message) return error.message
+  return String(error)
+}
+
 /** Displays one reminder.
  *
  *  Chrome on Android throws `Illegal constructor` on `new Notification()` and
  *  requires the service worker registration to raise it instead — the old direct
  *  construction meant reminders silently never arrived on Android while Settings
  *  reported permission as granted. So: worker first, constructor as the fallback
- *  for desktop browsers with no worker registered. */
+ *  for desktop browsers with no worker registered.
+ *
+ *  If both paths fail the error is recorded and surfaced in Settings instead of
+ *  being swallowed. A reminder that cannot be delivered is worth a complaint. */
 async function showReminder(title: string, body: string): Promise<void> {
   const options: NotificationOptions = {
     body,
@@ -52,17 +89,30 @@ async function showReminder(title: string, body: string): Promise<void> {
   if (registration) {
     try {
       await registration.showNotification(title, options)
+      setDeliveryFailure(null)
       return
-    } catch {
-      /* fall through to the constructor */
+    } catch (error) {
+      // Not fatal on its own — the constructor below still works on desktop
+      // browsers where the worker failed to register.
+      console.warn('Aquaen: showNotification() failed, trying the constructor', error)
     }
   }
 
   try {
     new Notification(title, options)
-  } catch {
-    /* a browser that rejects both paths just means no reminder this tick */
+    setDeliveryFailure(null)
+  } catch (error) {
+    console.error('Aquaen: could not deliver a reminder', error)
+    setDeliveryFailure(describe(error))
   }
+}
+
+/** Fires one reminder immediately, ignoring quiet hours and the interval.
+ *  Settings uses this so a delivery failure can be provoked on demand — on a
+ *  phone you cannot otherwise wait out an interval to find out it is broken. */
+export async function sendTestReminder(buddyName: string): Promise<string | null> {
+  await showReminder('Aquaen test reminder', `${buddyName} says hello — reminders are working.`)
+  return deliveryFailure
 }
 
 function insideActiveWindow(now: Date): boolean {

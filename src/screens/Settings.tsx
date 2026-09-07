@@ -4,7 +4,7 @@ import { Icon } from '../components/Icon'
 import { DAILY_GOAL_RANGE } from '../domain/types'
 import { clamped } from '../domain/clamp'
 import { ozWhole } from '../domain/format'
-import { useSyncedPermission } from '../services/reminders'
+import { sendTestReminder, useReminderFailure, useSyncedPermission } from '../services/reminders'
 import { isUninstalledIOS } from '../services/pwa'
 import { useAppState } from '../store/AppState'
 
@@ -20,6 +20,17 @@ export function Settings({ onManageContainers }: { onManageContainers: () => voi
   // Read once: it cannot change without a reload, since installing to the home
   // screen launches a separate window.
   const [needsInstall] = useState(isUninstalledIOS)
+  const deliveryFailure = useReminderFailure()
+  const [testResult, setTestResult] = useState<'idle' | 'sending' | 'sent'>('idle')
+
+  const runTestReminder = async () => {
+    setTestResult('sending')
+    const failure = await sendTestReminder(buddyName)
+    // A failure renders through `deliveryFailure`; this only reports success,
+    // then goes back to inviting another try.
+    setTestResult(failure ? 'idle' : 'sent')
+    if (!failure) window.setTimeout(() => setTestResult('idle'), 3000)
+  }
 
   const commitGoal = (raw: string) => {
     const parsed = Number(raw)
@@ -121,7 +132,27 @@ export function Settings({ onManageContainers }: { onManageContainers: () => voi
                 />
               </label>
             )}
+
+            {settings.reminderEnabled && permission === 'granted' && (
+              <button
+                type="button"
+                className="row row--button"
+                onClick={() => void runTestReminder()}
+              >
+                <span className="row__label">Send a Test Reminder</span>
+                <span className="muted">
+                  {testResult === 'sending' ? 'Sending…' : testResult === 'sent' ? 'Sent' : 'Try it'}
+                </span>
+              </button>
+            )}
           </div>
+
+          {deliveryFailure && (
+            <p className="hint" style={{ margin: '8px 4px 0', color: 'var(--rust)' }}>
+              A reminder could not be delivered: {deliveryFailure}. Reminders are enabled
+              and permitted, but this browser refused to show one.
+            </p>
+          )}
 
           {settings.reminderEnabled && (
             <p className="hint" style={{ margin: '8px 4px 0' }}>
