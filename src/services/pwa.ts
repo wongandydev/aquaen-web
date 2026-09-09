@@ -15,7 +15,11 @@ export function serviceWorkerRegistration(): ServiceWorkerRegistration | null {
 export async function registerServiceWorker(): Promise<void> {
   if (!('serviceWorker' in navigator)) return
   try {
-    registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' })
+    // Both paths are relative to the deploy base: on a GitHub Pages project
+    // site the app is not at the origin root, and a worker cannot claim a
+    // scope above its own URL.
+    const base = import.meta.env.BASE_URL
+    registration = await navigator.serviceWorker.register(`${base}sw.js`, { scope: base })
   } catch {
     /* An unavailable worker costs offline support and Android reminders; the
        app itself still runs entirely from memory and localStorage. */

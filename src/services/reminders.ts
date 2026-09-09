@@ -82,7 +82,7 @@ async function showReminder(title: string, body: string): Promise<void> {
   const options: NotificationOptions = {
     body,
     tag: 'aquaen-reminder',
-    icon: '/icon-192.png',
+    icon: `${import.meta.env.BASE_URL}icon-192.png`,
   }
 
   const registration = serviceWorkerRegistration()
