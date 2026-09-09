@@ -1,8 +1,8 @@
 # Aquaen — Web
 
-A web port of [Aquaen](../iOS/HydrationTracker), the vintage-themed hydration
-tracker for iOS. Same daily goal, same containers, same water buddy — running in
-a browser, with everything stored locally.
+A web port of Aquaen, the vintage-themed hydration tracker for iOS. Same daily
+goal, same containers, same water buddy — running in a browser, with everything
+stored locally.
 
 ## Running it
 
@@ -13,8 +13,28 @@ npm test         # domain tests (vitest)
 npm run build    # type-check + production bundle into dist/
 ```
 
-No backend, no accounts, no build-time configuration. `npm run build` produces a
-static `dist/` that can be served from anywhere.
+No backend and no accounts. `npm run build` produces a static `dist/`.
+
+## Deploying
+
+Pushing to `main` builds and publishes to GitHub Pages
+(`.github/workflows/deploy.yml`); the live site is
+<https://wongandydev.github.io/aquaen-web/>. The workflow runs `npm test`
+first, so a red suite stops the deploy.
+
+That is a Pages **project** site, served from `/aquaen-web/` rather than the
+domain root. The path is written once, as `base` in `vite.config.ts`:
+
+- Vite rewrites the asset URLs in `index.html` from it, and exposes it to the
+  app as `import.meta.env.BASE_URL` — which is how `services/pwa.ts` finds
+  `sw.js` and `services/reminders.ts` finds the notification icon.
+- `public/manifest.webmanifest` uses paths relative to itself (`./`), which the
+  browser resolves against wherever the manifest is served from.
+- `public/sw.js` reads the path off its own URL (`new URL('./', self.location)`),
+  because a worker is always served from the root of the scope it controls.
+
+Nothing hardcodes `/aquaen-web/` a second time, so moving the app to a domain
+root or a different repo name is a one-line change to `base`.
 
 ## What carried over from iOS
 

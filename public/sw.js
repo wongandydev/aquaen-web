@@ -19,10 +19,17 @@
 // Bump to invalidate every cached response after a release.
 const CACHE = 'aquaen-v1'
 
+// The deploy path, read off this worker's own URL rather than hardcoded: on a
+// GitHub Pages project site the app lives under /<repo>/, and a worker is
+// always served from the root of the scope it controls. At the origin root
+// this is just '/', so the same file works either way.
+const BASE = new URL('./', self.location).pathname
+const INDEX = `${BASE}index.html`
+
 // The shell is cached eagerly so a cold offline launch works. Hashed build
 // assets are not listed — they are picked up at runtime below, since their
 // names change every build and hardcoding them here would rot immediately.
-const SHELL = ['/', '/index.html', '/droplet.svg', '/manifest.webmanifest', '/icon-192.png']
+const SHELL = [BASE, INDEX, `${BASE}droplet.svg`, `${BASE}manifest.webmanifest`, `${BASE}icon-192.png`]
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -58,10 +65,10 @@ self.addEventListener('fetch', (event) => {
       fetch(request)
         .then((response) => {
           const copy = response.clone()
-          caches.open(CACHE).then((cache) => cache.put('/index.html', copy))
+          caches.open(CACHE).then((cache) => cache.put(INDEX, copy))
           return response
         })
-        .catch(() => caches.match('/index.html').then((hit) => hit ?? Response.error())),
+        .catch(() => caches.match(INDEX).then((hit) => hit ?? Response.error())),
     )
     return
   }
@@ -93,7 +100,7 @@ self.addEventListener('notificationclick', (event) => {
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       const existing = clients.find((c) => 'focus' in c)
       if (existing) return existing.focus()
-      return self.clients.openWindow('/')
+      return self.clients.openWindow(BASE)
     }),
   )
 })
